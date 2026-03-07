@@ -1,14 +1,15 @@
 # @package _global_
-# Graph UNet with betweenness centrality features
+# Graph UNet with identity (ones) node features + gated skip connections
 defaults:
   - override /model: refine_u
 
 model:
   gcn_type: unet
-  feat_type: betweenness
+  feat_type: ones
   pool_ratios: [0.7, 0.7, 0.7, 0.7]
   unet_loss_weight: 0.2
   output_activation: leaky_relu
+  gated_skip: true
 
 training:
   epochs: 50
