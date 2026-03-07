@@ -70,9 +70,14 @@ Per-fold CSVs and the final submission are also uploaded to W&B as artifacts.
 
 ```
 refine_u/
-├── train.py                    # Single entry point (Hydra @main)
+├── train.py                    # Hydra entry point (slim dispatcher)
 ├── data.py                     # Data loading, feature computation, augmentation
 ├── evaluate.py                 # Loss functions, full evaluation metrics, submission CSV
+├── plotting.py                 # Distribution and bar plot generation
+├── utils.py                    # Run naming, ensemble, rescaling, printing
+├── pipelines/
+│   ├── graph_cent.py           # GraphCent CV pipeline + helpers
+│   └── gsrn.py                 # GSRN CV pipeline + helpers
 ├── models/
 │   ├── __init__.py             # Exports GraphCentMapperModel, GSRNet
 │   ├── ops.py                  # Graph UNet building blocks

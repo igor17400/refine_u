@@ -1,5 +1,3 @@
-import os
-
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -85,13 +83,17 @@ def compute_full_evaluation(pred_matrices, gt_matrices):
 def save_submission_csv(pred_matrices, path):
     """Save predictions as CSV in Kaggle submission format."""
     preds_vect = []
+
     for pred in pred_matrices:
         pred_clipped = np.clip(pred, 0.0, 1.0)
         pred_vect = MatrixVectorizer.vectorize(pred_clipped, include_diagonal=False)
         preds_vect.append(pred_vect)
+
     preds_flat = np.concatenate(preds_vect)
     ids = np.arange(1, len(preds_flat) + 1)
+
     df = pd.DataFrame({"ID": ids, "Predicted": preds_flat})
     df.to_csv(path, index=False)
     print(f"Saved submission to {path} ({len(df)} rows)")
+
     return df

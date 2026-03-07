@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .ops import SymGraphUnet
+from refine_u.models.ops import SymGraphUnet
 
 
 class DenseGCNLayer(nn.Module):
