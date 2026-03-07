@@ -1,0 +1,19 @@
+# @package _global_
+# Best Kaggle score: 0.127483
+defaults:
+  - override /model: graph_cent
+
+model:
+  gcn_type: unet
+  feat_type: eigen
+  pool_ratios: [0.7, 0.7, 0.7, 0.7]
+  unet_loss_weight: 0.2
+
+training:
+  epochs: 50
+  loss: mixed
+  splits: 5
+  seeds: [42]
+  ensemble: true
+  aug_noise: 0
+  aug_edge_drop: 0

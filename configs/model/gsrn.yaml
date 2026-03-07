@@ -1,0 +1,5 @@
+name: gsrn
+hidden_dim: 320
+padding: 26
+pool_ratios: [0.9, 0.7, 0.6, 0.5]
+lmbda: 16

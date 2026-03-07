@@ -1,0 +1,16 @@
+# @package _global_
+# Kaggle score: 0.127735
+defaults:
+  - override /model: graph_cent
+
+model:
+  gcn_type: traditional
+
+training:
+  epochs: 50
+  loss: mixed
+  splits: 5
+  seeds: [42]
+  ensemble: true
+  aug_noise: 0
+  aug_edge_drop: 0

@@ -1,0 +1,21 @@
+defaults:
+  - model: graph_cent
+  - training: default
+  - optional experiment: null
+  - _self_
+
+data:
+  dir: data/
+  lr_dim: 160
+  hr_dim: 268
+  cache_dir: data/
+
+wandb:
+  project: refine_u
+  enabled: true
+
+hydra:
+  job:
+    chdir: false
+  run:
+    dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
