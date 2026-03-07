@@ -14,7 +14,12 @@ from refine_u.evaluate import (
 )
 from refine_u.models import GSRNet
 from refine_u.models.gsrn import pad_HR_adj, unpad
-from refine_u.plotting import plot_evaluation_barplots, save_plots
+from refine_u.plotting import (
+    log_average_plots,
+    log_fold_plots,
+    log_mae_mse_barplot,
+    plot_evaluation_barplots,
+)
 from refine_u.utils import (
     build_run_name,
     ensemble_predictions,
@@ -123,10 +128,10 @@ def run_gsrn(cfg, lr_matrices, hr_matrices, lr_matrices_test):
     padding = cfg.model.padding
 
     fold_mse, fold_mae = [], []
-    all_preds, all_gt = [], []
     fold_test_preds = []
     all_fold_pred_matrices = []
     global_step = 0
+    model_idx = 0
 
     for seed in seeds:
         torch.manual_seed(seed)
@@ -149,6 +154,7 @@ def run_gsrn(cfg, lr_matrices, hr_matrices, lr_matrices_test):
         cv = KFold(n_splits=cfg.training.splits, shuffle=True, random_state=seed)
 
         for fold_idx, (train_index, test_index) in enumerate(cv.split(lr_matrices)):
+            model_idx += 1
             print(f"\n--- Seed {seed}, Fold {fold_idx + 1}/{cfg.training.splits} ---")
 
             x_train = lr_matrices[train_index]
@@ -173,7 +179,6 @@ def run_gsrn(cfg, lr_matrices, hr_matrices, lr_matrices_test):
                         "val/mse": val_mse,
                         "val/mae": val_mae,
                     },
-                    step=global_step,
                 )
 
                 if (epoch + 1) % 10 == 0 or epoch == cfg.training.epochs - 1:
@@ -200,18 +205,22 @@ def run_gsrn(cfg, lr_matrices, hr_matrices, lr_matrices_test):
                     pred_np = np.clip(pred_s.cpu().numpy(), 0.0, 1.0)
                     fold_pred_matrices.append(pred_np)
                     fold_gt_matrices.append(hr_s.cpu().numpy())
-                    all_preds.append(pred_s.cpu().flatten().numpy())
-                    all_gt.append(hr_s.cpu().flatten().numpy())
 
-            all_fold_pred_matrices.append(
-                (np.array(fold_pred_matrices), np.array(fold_gt_matrices))
-            )
+            fold_pred_matrices = np.array(fold_pred_matrices)
+            fold_gt_matrices = np.array(fold_gt_matrices)
+            all_fold_pred_matrices.append((fold_pred_matrices, fold_gt_matrices))
 
             print(f"Fold {fold_idx + 1} — MSE: {val_mse:.6f} MAE: {val_mae:.6f}")
 
+            # Test predictions for ensemble
+            fold_test = None
             if cfg.training.ensemble:
-                preds = _predict(model, lr_matrices_test, device, padding)
-                fold_test_preds.append(preds)
+                fold_test = _predict(model, lr_matrices_test, device, padding)
+                fold_test_preds.append(fold_test)
+
+            # Per-fold plots
+            if cfg.training.plots:
+                log_fold_plots(model_idx, fold_pred_matrices, fold_gt_matrices, fold_test)
 
     print_cv_summary(seeds, cfg.training.splits, fold_mse, fold_mae)
     avg_mae = np.mean(fold_mae)
@@ -224,17 +233,19 @@ def run_gsrn(cfg, lr_matrices, hr_matrices, lr_matrices_test):
         }
     )
 
+    # MAE/MSE bar plot (always logged)
+    log_mae_mse_barplot(fold_mse, fold_mae)
+
     run_name = build_run_name(cfg)
 
-    # Save per-fold prediction CSVs and compute deferred evaluation
+    # Save per-fold prediction CSVs
     print(f"\n{'=' * 60}")
-    print("Post-training: saving fold CSVs and computing evaluation metrics")
+    print("Post-training: saving fold CSVs")
     print(f"{'=' * 60}")
 
     fold_output_dir = os.path.join("outputs", run_name, "folds")
     os.makedirs(fold_output_dir, exist_ok=True)
 
-    all_fold_metrics = []
     fold_artifact = wandb.Artifact(
         name=f"fold-predictions-{run_name}"[:128],
         type="fold_predictions",
@@ -249,17 +260,20 @@ def run_gsrn(cfg, lr_matrices, hr_matrices, lr_matrices_test):
         save_submission_csv(fold_preds, fold_csv_path)
         fold_artifact.add_file(fold_csv_path, name=f"predictions_fold_{fold_num}.csv")
 
-        fold_metrics = compute_full_evaluation(fold_preds, fold_gts)
-        all_fold_metrics.append(fold_metrics)
-        print(
-            f"  Fold {fold_num}: MAE={fold_metrics['MAE']:.5f} PCC={fold_metrics['PCC']:.5f} "
-            f"JSD={fold_metrics['JSD']:.5f} BC={fold_metrics['BC']:.5f} "
-            f"EC={fold_metrics['EC']:.5f} PC={fold_metrics['PC']:.5f}"
-        )
-
     wandb.log_artifact(fold_artifact)
 
-    if all_fold_metrics:
+    # Full evaluation metrics (optional — slow due to NetworkX centrality)
+    all_fold_metrics = []
+    if cfg.training.eval_metrics:
+        print("Computing full evaluation metrics...")
+        for fold_i, (fold_preds, fold_gts) in enumerate(all_fold_pred_matrices):
+            fold_metrics = compute_full_evaluation(fold_preds, fold_gts)
+            all_fold_metrics.append(fold_metrics)
+            print(
+                f"  Fold {fold_i + 1}: MAE={fold_metrics['MAE']:.5f} PCC={fold_metrics['PCC']:.5f} "
+                f"JSD={fold_metrics['JSD']:.5f} BC={fold_metrics['BC']:.5f} "
+                f"EC={fold_metrics['EC']:.5f} PC={fold_metrics['PC']:.5f}"
+            )
         print_eval_summary(all_fold_metrics)
         avg_metrics = {
             k: np.mean([m[k] for m in all_fold_metrics]) for k in all_fold_metrics[0]
@@ -277,10 +291,9 @@ def run_gsrn(cfg, lr_matrices, hr_matrices, lr_matrices_test):
     submission_df = save_submission_csv(pred_matrices, submission_path)
 
     if cfg.training.plots:
-        plot_dir = os.path.join("outputs", run_name, "plots")
         if all_fold_metrics:
-            plot_evaluation_barplots(all_fold_metrics, plot_dir)
-        save_plots(all_preds, all_gt, submission_df["Predicted"].values, run_name, plot_dir)
+            plot_evaluation_barplots(all_fold_metrics)
+        log_average_plots(all_fold_pred_matrices, fold_test_preds or None)
 
     artifact = wandb.Artifact(
         name=f"submission-{run_name}"[:128],

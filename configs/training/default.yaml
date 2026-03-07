@@ -13,3 +13,4 @@ aug_noise: 0.01 # gaussian noise std on adjacency
 aug_edge_drop: 0.05 # edge drop probability
 rescale: false # rescale predictions to match training HR distribution
 plots: true # generate distribution and evaluation plots
+eval_metrics: false # compute full evaluation metrics (MAE, PCC, JSD, BC, EC, PC)
