@@ -2,13 +2,13 @@ epochs: 50
 lr: 0.0001
 weight_decay: 0.0001
 eta_min: 0.00001
-loss: mixed              # mse | l1 | mixed (0.5*mse + 0.5*l1)
-splits: 5
+loss: mixed # mse | l1 | mixed (0.5*mse + 0.5*l1)
+splits: 3
 seeds: [42]
-ensemble: true           # average fold model predictions instead of full retrain
-best_ckpt: true          # restore best checkpoint per fold (by val MAE)
-patience: 0              # early stopping patience (0 = disabled)
-full_epochs: 200         # epochs for full retrain (only used if ensemble=false)
-aug_noise: 0.01          # gaussian noise std on adjacency
-aug_edge_drop: 0.05      # edge drop probability
-rescale: false           # rescale predictions to match training HR distribution
+ensemble: true # average fold model predictions instead of full retrain
+best_ckpt: true # restore best checkpoint per fold (by val MAE)
+patience: 0 # early stopping patience (0 = disabled)
+full_epochs: 200 # epochs for full retrain (only used if ensemble=false)
+aug_noise: 0.01 # gaussian noise std on adjacency
+aug_edge_drop: 0.05 # edge drop probability
+rescale: false # rescale predictions to match training HR distribution
