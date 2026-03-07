@@ -12,3 +12,4 @@ full_epochs: 200 # epochs for full retrain (only used if ensemble=false)
 aug_noise: 0.01 # gaussian noise std on adjacency
 aug_edge_drop: 0.05 # edge drop probability
 rescale: false # rescale predictions to match training HR distribution
+plots: true # generate distribution and evaluation plots

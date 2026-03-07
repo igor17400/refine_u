@@ -436,10 +436,11 @@ def run_graph_cent(cfg, lr_matrices, hr_matrices, lr_matrices_test):
     submission_df = save_submission_csv(pred_matrices, submission_path)
 
     # Plots
-    plot_dir = os.path.join("outputs", run_name, "plots")
-    if all_fold_metrics:
-        plot_evaluation_barplots(all_fold_metrics, plot_dir)
-    save_plots(all_preds, all_gt, submission_df["Predicted"].values, run_name, plot_dir)
+    if cfg.training.plots:
+        plot_dir = os.path.join("outputs", run_name, "plots")
+        if all_fold_metrics:
+            plot_evaluation_barplots(all_fold_metrics, plot_dir)
+        save_plots(all_preds, all_gt, submission_df["Predicted"].values, run_name, plot_dir)
 
     # Wandb artifact
     artifact = wandb.Artifact(

@@ -276,10 +276,11 @@ def run_gsrn(cfg, lr_matrices, hr_matrices, lr_matrices_test):
     os.makedirs(os.path.dirname(submission_path), exist_ok=True)
     submission_df = save_submission_csv(pred_matrices, submission_path)
 
-    plot_dir = os.path.join("outputs", run_name, "plots")
-    if all_fold_metrics:
-        plot_evaluation_barplots(all_fold_metrics, plot_dir)
-    save_plots(all_preds, all_gt, submission_df["Predicted"].values, run_name, plot_dir)
+    if cfg.training.plots:
+        plot_dir = os.path.join("outputs", run_name, "plots")
+        if all_fold_metrics:
+            plot_evaluation_barplots(all_fold_metrics, plot_dir)
+        save_plots(all_preds, all_gt, submission_df["Predicted"].values, run_name, plot_dir)
 
     artifact = wandb.Artifact(
         name=f"submission-{run_name}"[:128],

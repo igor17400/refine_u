@@ -12,3 +12,4 @@ training:
   loss: mse
   aug_noise: 0.0
   aug_edge_drop: 0.0
+  plots: false

@@ -13,3 +13,4 @@ training:
   ensemble: true
   aug_noise: 0
   aug_edge_drop: 0
+  plots: false
