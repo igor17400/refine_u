@@ -13,7 +13,7 @@ from omegaconf import DictConfig, OmegaConf
 
 import wandb
 from refine_u.data import load_data
-from refine_u.pipelines import run_graph_cent, run_gsrn
+from refine_u.pipelines import run_defend, run_gsrn, run_refine_u
 from refine_u.utils import build_run_name
 
 
@@ -39,10 +39,12 @@ def main(cfg: DictConfig):
         f"Data loaded: {lr_matrices.shape[0]} train, {lr_matrices_test.shape[0]} test"
     )
 
-    if cfg.model.name == "gsrn":
+    if cfg.model.name == "defend":
+        run_defend(cfg, lr_matrices, hr_matrices, lr_matrices_test)
+    elif cfg.model.name == "gsrn":
         run_gsrn(cfg, lr_matrices, hr_matrices, lr_matrices_test)
     else:
-        run_graph_cent(cfg, lr_matrices, hr_matrices, lr_matrices_test)
+        run_refine_u(cfg, lr_matrices, hr_matrices, lr_matrices_test)
 
     wandb.finish()
     print("Done.")

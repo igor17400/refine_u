@@ -54,6 +54,7 @@ def _build_model(cfg, device):
         pool_ratios=pool_ratios,
         gated_skip=cfg.model.gated_skip,
         low_rank_k=cfg.model.low_rank_k,
+        output_activation=cfg.model.output_activation,
     ).to(device)
 
 
@@ -214,7 +215,7 @@ def _full_retrain(
 # ---------------------------------------------------------------------------
 
 
-def run_graph_cent(cfg, lr_matrices, hr_matrices, lr_matrices_test):
+def run_refine_u(cfg, lr_matrices, hr_matrices, lr_matrices_test):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
@@ -362,7 +363,9 @@ def run_graph_cent(cfg, lr_matrices, hr_matrices, lr_matrices_test):
 
             # Per-fold plots
             if cfg.training.plots:
-                log_fold_plots(model_idx, fold_pred_matrices, fold_gt_matrices, fold_test)
+                log_fold_plots(
+                    model_idx, fold_pred_matrices, fold_gt_matrices, fold_test
+                )
 
     # CV summary
     print_cv_summary(seeds, cfg.training.splits, fold_mse, fold_mae)

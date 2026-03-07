@@ -1,0 +1,17 @@
+name: defend
+sr_method: linear_algebraic # linear_algebraic | bi_lc | bi_mp
+use_dual: false
+refine_target: false
+target_refine_fully_connected: true
+hidden_dim: 32
+num_heads: 4
+dropout: 0.2
+edge_dim: 1
+beta: false
+min_max_scale: true
+binarize: false
+node_feat_init: adj # adj | ones | identity | random
+node_feat_dim: 1
+batch_size: 16
+dual_node_out_dim: 1
+warm_up_epochs: 30

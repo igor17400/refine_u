@@ -1,5 +1,5 @@
 # @package _global_
-# Best Kaggle score: 0.127483
+# Graph UNet with eigen features + leaky ReLU output activation
 defaults:
   - override /model: refine_u
 
@@ -8,6 +8,7 @@ model:
   feat_type: eigen
   pool_ratios: [0.7, 0.7, 0.7, 0.7]
   unet_loss_weight: 0.2
+  output_activation: leaky_relu
 
 training:
   epochs: 50
@@ -16,5 +17,3 @@ training:
   ensemble: true
   aug_noise: 0
   aug_edge_drop: 0
-  plots: true
-  eval_metrics: false

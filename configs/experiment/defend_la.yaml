@@ -1,0 +1,19 @@
+# @package _global_
+# DEFEND baseline: Linear Algebraic SR
+defaults:
+  - override /model: defend
+
+model:
+  sr_method: linear_algebraic
+
+training:
+  epochs: 50
+  lr: 0.001
+  weight_decay: 0.0
+  splits: 3
+  patience: 7
+  seeds: [42]
+  ensemble: true
+  loss: l1
+  aug_noise: 0
+  aug_edge_drop: 0

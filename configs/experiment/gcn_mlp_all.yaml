@@ -1,7 +1,7 @@
 # @package _global_
 # GCN + MLP with all features (eigen + betweenness)
 defaults:
-  - override /model: graph_cent
+  - override /model: refine_u
 
 model:
   gcn_type: traditional

@@ -4,9 +4,9 @@ import numpy as np
 def build_run_name(cfg):
     parts = []
 
-    if cfg.model.name == "graph_cent":
+    if cfg.model.name == "refine_u":
         parts.append(
-            "gcn" if cfg.model.gcn_type == "traditional" else cfg.model.gcn_type
+            "gcn" if cfg.model.gcn_type == "traditional" else "refine_u"
         )
         parts.append(cfg.model.feat_type)
         if cfg.model.gcn_type == "unet" and cfg.model.pool_ratios:
@@ -16,6 +16,11 @@ def build_run_name(cfg):
             parts.append("gated")
         if cfg.model.low_rank_k > 0:
             parts.append(f"lr{cfg.model.low_rank_k}")
+    elif cfg.model.name == "defend":
+        parts.append("defend")
+        parts.append(cfg.model.sr_method)
+        if cfg.model.use_dual:
+            parts.append("dual")
     elif cfg.model.name == "gsrn":
         parts.append("gsrn")
         parts.append(f"lmbda{cfg.model.lmbda}")

@@ -4,9 +4,10 @@ defaults:
   - override /model: gsrn
 
 training:
-  epochs: 200
+  epochs: 50
   lr: 0.0001
   weight_decay: 0.0
+  splits: 3
   seeds: [42]
   ensemble: true
   loss: mse

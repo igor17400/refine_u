@@ -1,5 +1,5 @@
 defaults:
-  - model: graph_cent
+  - model: refine_u
   - training: default
   - optional experiment: null
   - _self_
