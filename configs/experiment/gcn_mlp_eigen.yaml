@@ -9,7 +9,6 @@ model:
 training:
   epochs: 50
   loss: mixed
-  splits: 5
   seeds: [42]
   ensemble: true
   aug_noise: 0
