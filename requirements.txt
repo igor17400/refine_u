@@ -11,3 +11,4 @@ omegaconf>=2.3.0
 wandb>=0.15.0
 torch-geometric>=2.4.0
 joblib>=1.2.0
+jupyter>=1.0.0

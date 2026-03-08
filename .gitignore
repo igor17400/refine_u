@@ -36,7 +36,6 @@ Thumbs.db
 outputs/
 plots/
 *_predictions.csv
-predictions_fold_*.csv
 data/cache_*.pt
 data/
 
