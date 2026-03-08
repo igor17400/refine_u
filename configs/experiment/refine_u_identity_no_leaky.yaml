@@ -1,0 +1,19 @@
+# @package _global_
+# Graph UNet with identity (ones) node features, no output activation
+defaults:
+  - override /model: refine_u
+
+model:
+  gcn_type: unet
+  feat_type: ones
+  pool_ratios: [0.7, 0.7, 0.7, 0.7]
+  unet_loss_weight: 0.2
+  output_activation: none
+
+training:
+  epochs: 50
+  loss: mixed
+  seeds: [42]
+  ensemble: true
+  aug_noise: 0
+  aug_edge_drop: 0
