@@ -11,6 +11,7 @@ from refine_u.data import GraphCentralityDataset, augment_adjacency
 from refine_u.evaluate import (
     compute_full_evaluation,
     compute_loss,
+    compute_unet_loss,
     mae_criterion,
     mse_criterion,
     save_submission_csv,
@@ -112,7 +113,7 @@ def _train_one_epoch(model, optimizer, adj_data, feat_data, labels, device, cfg)
         pred, x_in, x_out = model(adj, feat)
 
         pred_loss = compute_loss(pred, hr, cfg.training.loss)
-        unet_loss = mse_criterion(x_in, x_out)
+        unet_loss = compute_unet_loss(x_in, x_out, cfg.model.unet_loss_type)
         loss = pred_loss + (
             cfg.model.unet_loss_weight * unet_loss if model.gcn_type == "unet" else 0.0
         )
@@ -403,8 +404,13 @@ def run_refine_u(cfg, lr_matrices, hr_matrices, lr_matrices_test):
         fold_csv_path = os.path.join(
             fold_output_dir, f"predictions_fold_{fold_num}.csv"
         )
+        gt_csv_path = os.path.join(
+            fold_output_dir, f"groundtruth_fold_{fold_num}.csv"
+        )
         save_submission_csv(fold_preds, fold_csv_path)
+        save_submission_csv(fold_gts, gt_csv_path)
         fold_artifact.add_file(fold_csv_path, name=f"predictions_fold_{fold_num}.csv")
+        fold_artifact.add_file(gt_csv_path, name=f"groundtruth_fold_{fold_num}.csv")
 
     wandb.log_artifact(fold_artifact)
 

@@ -9,4 +9,5 @@ pool_ratios: null # e.g. [0.7, 0.7, 0.7, 0.7] for UNet; null = default [0.5]x4
 gated_skip: false
 low_rank_k: 0 # 0 = full rank, >0 = low-rank factorization
 unet_loss_weight: 0.0 # auxiliary UNet reconstruction loss weight
+unet_loss_type: mse # mse | cosine | contrastive | spectral
 output_activation: none # none | leaky_relu | relu

@@ -1,7 +1,9 @@
 import networkx as nx
 import numpy as np
 import pandas as pd
+import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from scipy.spatial.distance import jensenshannon
 from scipy.stats import pearsonr
 from sklearn.metrics import mean_absolute_error
@@ -20,6 +22,28 @@ def compute_loss(pred, target, loss_type="mse"):
     if loss_type == "l1":
         return mae
     return 0.5 * mse + 0.5 * mae
+
+
+def compute_unet_loss(x_in, x_out, loss_type="mse"):
+    if loss_type == "spectral":
+        # Gram-matrix matching: preserve pairwise node relationships
+        # x_in, x_out: (B, N, D) or (N, D)
+        g_in = x_in @ x_in.mT    # (B, N, N) or (N, N)
+        g_out = x_out @ x_out.mT
+        return F.mse_loss(g_out, g_in)
+    elif loss_type == "cosine":
+        return 1.0 - F.cosine_similarity(x_in, x_out, dim=-1).mean()
+    elif loss_type == "contrastive":
+        # x_in, x_out: (N, D) — compare node embeddings
+        x_in_norm = F.normalize(x_in, dim=-1)
+        x_out_norm = F.normalize(x_out, dim=-1)
+        logits = x_out_norm @ x_in_norm.mT / 0.1  # (N, N)
+        labels = torch.arange(x_in.size(-2), device=x_in.device)
+        return F.cross_entropy(logits.squeeze(0), labels)
+    elif loss_type == "l1":
+        return mae_criterion(x_in, x_out)
+    else:
+        return mse_criterion(x_in, x_out)
 
 
 def compute_full_evaluation(pred_matrices, gt_matrices):

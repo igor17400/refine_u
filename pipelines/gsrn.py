@@ -257,8 +257,13 @@ def run_gsrn(cfg, lr_matrices, hr_matrices, lr_matrices_test):
         fold_csv_path = os.path.join(
             fold_output_dir, f"predictions_fold_{fold_num}.csv"
         )
+        gt_csv_path = os.path.join(
+            fold_output_dir, f"groundtruth_fold_{fold_num}.csv"
+        )
         save_submission_csv(fold_preds, fold_csv_path)
+        save_submission_csv(fold_gts, gt_csv_path)
         fold_artifact.add_file(fold_csv_path, name=f"predictions_fold_{fold_num}.csv")
+        fold_artifact.add_file(gt_csv_path, name=f"groundtruth_fold_{fold_num}.csv")
 
     wandb.log_artifact(fold_artifact)
 
