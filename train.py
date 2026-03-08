@@ -27,6 +27,7 @@ def main(cfg: DictConfig):
         wandb.init(
             project=cfg.wandb.project,
             name=run_name,
+            group=cfg.wandb.get("group", None),
             config=OmegaConf.to_container(cfg, resolve=True),
         )
     else:

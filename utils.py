@@ -16,6 +16,13 @@ def build_run_name(cfg):
             parts.append("gated")
         if cfg.model.low_rank_k > 0:
             parts.append(f"lr{cfg.model.low_rank_k}")
+        if cfg.model.gcn_type == "unet":
+            ulw = cfg.model.unet_loss_weight
+            if ulw > 0:
+                ult = cfg.model.unet_loss_type
+                parts.append(f"ul-{ult}-{ulw}")
+            else:
+                parts.append("ulw0.0")
     elif cfg.model.name == "defend":
         parts.append("defend")
         parts.append(cfg.model.sr_method)
@@ -31,6 +38,8 @@ def build_run_name(cfg):
     seeds = list(cfg.training.seeds)
     if len(seeds) > 1:
         parts.append(f"{len(seeds)}s")
+    else:
+        parts.append(f"s{seeds[0]}")
 
     parts.append(cfg.training.loss)
     parts.append("ens" if cfg.training.ensemble else "full")
