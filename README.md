@@ -130,7 +130,7 @@ data/
 
 ### UNet Loss Weight Ablation
 
-![UNet Loss Ablation](plots/ulw_ablation.png)
+![UNet Loss Ablation](ulw_ablation.png)
 
 ## References
 
