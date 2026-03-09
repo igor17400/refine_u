@@ -28,7 +28,7 @@ Node features are precomputed **betweenness centrality** values. Training uses 3
 
 ### Model Architecture
 
-![RefineU Architecture](refine_u_architecture.excalidraw)
+![RefineU Architecture](architecture.png)
 
 ## Used External Libraries
 
