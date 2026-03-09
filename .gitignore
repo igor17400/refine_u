@@ -38,6 +38,7 @@ plots/
 *_predictions.csv
 data/cache_*.pt
 data/
+src/refine_u/data/
 
 # Weights & Biases
 wandb/

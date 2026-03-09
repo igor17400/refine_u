@@ -30,19 +30,40 @@ Node features are precomputed **betweenness centrality** values. Training uses 3
 
 ![RefineU Architecture](architecture.png)
 
-## Used External Libraries
+## Project Structure
+
+```
+refine_u/
+├── README.md
+├── RefineU.ipynb          # Jupyter notebook (single model training demo)
+├── RefineU.pdf            # Report
+├── requirements.txt       # Python dependencies
+├── data/                  # Dataset CSVs (not tracked)
+│   ├── lr_train.csv
+│   ├── hr_train.csv
+│   └── lr_test.csv
+├── predictions_fold_*.csv # Per-fold CV predictions
+├── submission.csv         # Final ensemble submission
+└── src/                   # Full source code
+    ├── pyproject.toml
+    └── refine_u/
+        ├── train.py       # Hydra CLI entry point
+        ├── models/        # Model definitions (RefineU, DEFEND, GSRN)
+        ├── pipelines/     # Training pipelines
+        ├── configs/       # Hydra YAML configs
+        ├── evaluate.py    # Loss functions & evaluation metrics
+        ├── data.py        # Data loading & feature computation
+        ├── plotting.py    # Visualization utilities
+        └── ...
+```
+
+## Dependencies
 
 Install all dependencies with:
 
 ```bash
-# With uv (recommended)
-uv sync
-
-# Or with pip
 pip install -r requirements.txt
 ```
-
-### Dependencies
 
 | Library | Purpose |
 |---------|---------|
@@ -60,18 +81,43 @@ pip install -r requirements.txt
 | `wandb` >= 0.15.0 | Experiment tracking |
 | `joblib` >= 1.2.0 | Parallelized evaluation |
 
-## How to Train
+## Data
 
-### Jupyter Notebook (single config demo)
+Place the dataset CSVs in `data/` at the repository root:
 
-The notebook **`RefineU.ipynb`** demonstrates training for one of our configurations (**RefineU-B-Gated**) end-to-end — from data loading to submission CSV. It is self-contained and does not require Hydra or W&B.
+```
+data/
+├── lr_train.csv
+├── hr_train.csv
+└── lr_test.csv
+```
 
-### CLI Training (all model configs)
+## How to Run
 
-The CLI uses [Hydra](https://hydra.cc/) for configuration. To train any model, run:
+### 1. Jupyter Notebook (single config demo)
+
+The notebook **`RefineU.ipynb`** trains one configuration (**RefineU-B-Gated**) end-to-end — from data loading through evaluation to submission CSV generation. It is fully self-contained and does not require Hydra or W&B.
 
 ```bash
-uv run python train.py experiment=<experiment_name>
+pip install -r requirements.txt
+jupyter notebook RefineU.ipynb
+```
+
+Run all cells sequentially. The notebook will:
+1. Load and preprocess the LR/HR brain graph data
+2. Compute betweenness centrality node features (cached after first run)
+3. Train RefineU-B-Gated with 3-fold cross-validation (50 epochs per fold)
+4. Evaluate on 8 metrics (MAE, PCC, JSD, BC, EC, PC, CC, DC)
+5. Generate `submission.csv` with ensembled test predictions
+
+### 2. CLI Training (all model configs)
+
+The CLI in `src/` uses [Hydra](https://hydra.cc/) for composable configuration and [W&B](https://wandb.ai/) for experiment tracking. To train any model variant:
+
+```bash
+cd src
+pip install -e .
+python -m refine_u.train experiment=<experiment_name>
 ```
 
 #### Available experiments
@@ -102,24 +148,13 @@ Leaky ReLU / no-leaky variants are also available by appending `_no_leaky` (e.g.
 
 ```bash
 # Change UNet loss weight
-uv run python train.py experiment=refine_u_betweenness_gated model.unet_loss_weight=0.1
+python -m refine_u.train experiment=refine_u_betweenness_gated model.unet_loss_weight=0.1
 
 # Disable W&B logging
-uv run python train.py experiment=refine_u_betweenness_gated wandb.enabled=false
+python -m refine_u.train experiment=refine_u_betweenness_gated wandb.enabled=false
 
 # Change number of epochs
-uv run python train.py experiment=refine_u_betweenness_gated training.epochs=100
-```
-
-### Data
-
-Place the dataset CSVs in `data/`:
-
-```
-data/
-├── lr_train.csv
-├── hr_train.csv
-└── lr_test.csv
+python -m refine_u.train experiment=refine_u_betweenness_gated training.epochs=100
 ```
 
 ## Results
